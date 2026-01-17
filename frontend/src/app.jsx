@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { api } from "./api/client";
+
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -10,7 +12,6 @@ import Statistics from "./pages/Statistics";
 import Status from "./pages/Status";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
-import { api } from "./api/client";
 
 export default function App() {
   const [me, setMe] = useState(null);
@@ -29,16 +30,18 @@ export default function App() {
 
   useEffect(() => { refreshMe(); }, []);
 
-  if (loading) return <div className="min-h-screen bg-slate-950 text-slate-200 grid place-items-center">Loading…</div>;
+  if (loading) {
+    return <div className="min-h-screen bg-slate-950 text-slate-200 grid place-items-center">Loading…</div>;
+  }
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/login" element={me ? <Navigate to="/" /> : <Login onAuthed={refreshMe} />} />
         <Route path="/signup" element={me ? <Navigate to="/" /> : <Signup onAuthed={refreshMe} />} />
 
-        <Route path="/" element={me ? <Layout me={me} onMe={setMe} /> : <Navigate to="/login" />}>
-          <Route index element={<Home me={me} />} />
+        <Route path="/" element={me ? <Layout me={me} onLogout={() => setMe(null)} /> : <Navigate to="/login" />}>
+          <Route index element={<Home />} />
           <Route path="account" element={<Account me={me} onUpdated={setMe} />} />
           <Route path="subscribe" element={<Subscribe me={me} onUpdated={setMe} />} />
           <Route path="statistics" element={<Statistics me={me} />} />
@@ -48,6 +51,6 @@ export default function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
