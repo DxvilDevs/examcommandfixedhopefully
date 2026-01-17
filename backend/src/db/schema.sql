@@ -1,0 +1,71 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  account_name TEXT NOT NULL DEFAULT 'Account',
+  preferred_name TEXT NOT NULL DEFAULT 'Student',
+  role TEXT NOT NULL DEFAULT 'USER',          -- USER | OWNER
+  plan TEXT NOT NULL DEFAULT 'FREE',          -- FREE | PREMIUM
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  done BOOLEAN NOT NULL DEFAULT FALSE,
+  estimate_minutes INT NOT NULL DEFAULT 25,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS exams (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label TEXT NOT NULL,
+  exam_date DATE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS revisions (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  topic TEXT NOT NULL,
+  minutes INT NOT NULL DEFAULT 30,
+  revised_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS focus_sessions (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  mode TEXT NOT NULL DEFAULT 'POMODORO',       -- POMODORO | DEEP
+  minutes INT NOT NULL,
+  started_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS momentum (
+  user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  score INT NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS issues (
+  id SERIAL PRIMARY KEY,
+  status TEXT NOT NULL DEFAULT 'INVESTIGATING',  -- INVESTIGATING | IDENTIFIED | MONITORING | RESOLVED
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS legal_docs (
+  id SERIAL PRIMARY KEY,
+  key TEXT UNIQUE NOT NULL,    -- TOS | PRIVACY
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO legal_docs (key, title, content)
+VALUES
+  ('TOS', 'Terms of Service', 'Add your Terms of Service here.'),
+  ('PRIVACY', 'Privacy Policy', 'Add your Privacy Policy here.')
+ON CONFLICT (key) DO NOTHING;
