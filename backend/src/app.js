@@ -9,7 +9,7 @@ import { legalRoutes } from "./routes/legal.routes.js";
 import { subscriptionRoutes } from "./routes/subscription.routes.js";
 import { errorHandler } from "./middleware/error.js";
 import { planRoutes } from "./routes/plan.routes.js";
-
+import { focusRoutes } from "./routes/focus.routes.js";
 
 export function createApp() {
   const app = express();
@@ -27,6 +27,7 @@ export function createApp() {
   app.use("/status", statusRoutes);
   app.use("/legal", legalRoutes);
   app.use("/plan", planRoutes);
+  app.use("/focus", focusRoutes);
   
   app.use(errorHandler);
 
