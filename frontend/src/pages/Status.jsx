@@ -354,3 +354,44 @@ export default function Status({ me }) {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <div className="text-xs text-slate-300 mb-1">Title</div>
+                <input
+                  className="w-full rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2 outline-none"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Login issues"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs text-slate-300 mb-1">Description</div>
+              <textarea
+                className="w-full min-h-[140px] rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2 outline-none"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Write an update…"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-xs text-slate-400">
+                {editingIssue ? `Editing issue #${editingIssue.id}` : "Creating new issue"}
+              </div>
+
+              <button
+                onClick={submit}
+                className="rounded-xl px-4 py-2 bg-indigo-500/90 hover:bg-indigo-500 transition font-medium"
+              >
+                {editingId ? "Update issue" : "Create issue"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
