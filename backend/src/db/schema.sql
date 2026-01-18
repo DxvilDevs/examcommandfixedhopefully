@@ -93,3 +93,6 @@ CREATE TABLE IF NOT EXISTS momentum_events (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE IF EXISTS users
+  ADD COLUMN IF NOT EXISTS paypal_subscription_id TEXT,
+  ADD COLUMN IF NOT EXISTS premium_since TIMESTAMP;
