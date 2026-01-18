@@ -129,6 +129,5 @@ export default function Home() {
       </div>
     </div>
   );
+  <TodaysPlanCard me={me} />
 }
-
-<TodaysPlanCard me={me} />
