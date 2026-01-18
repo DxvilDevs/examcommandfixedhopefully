@@ -1,16 +1,31 @@
-// frontend/src/pages/Status.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { statusApi } from "../api/status";
 
 const STATUSES = ["INVESTIGATING", "IDENTIFIED", "MONITORING", "RESOLVED"];
+
+function statusDot(status) {
+  switch (status) {
+    case "INVESTIGATING":
+      return { ring: "bg-yellow-400", glow: "bg-yellow-400/30" };
+    case "IDENTIFIED":
+      return { ring: "bg-orange-400", glow: "bg-orange-400/30" };
+    case "MONITORING":
+      return { ring: "bg-sky-400", glow: "bg-sky-400/30" };
+    case "RESOLVED":
+      return { ring: "bg-emerald-400", glow: "bg-emerald-400/30" };
+    default:
+      return { ring: "bg-slate-400", glow: "bg-slate-400/30" };
+  }
+}
 
 export default function Status({ me }) {
   const [issues, setIssues] = useState([]);
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
 
-  // owner form state
   const isOwner = me?.role === "OWNER";
+
+  // Owner form state
   const [editingId, setEditingId] = useState(null);
   const [status, setStatus] = useState("INVESTIGATING");
   const [title, setTitle] = useState("");
@@ -20,6 +35,15 @@ export default function Status({ me }) {
     () => issues.find((i) => i.id === editingId) || null,
     [issues, editingId]
   );
+
+  const overallStatus =
+    issues.some((i) => i.status === "INVESTIGATING")
+      ? "INVESTIGATING"
+      : issues.some((i) => i.status === "IDENTIFIED")
+      ? "IDENTIFIED"
+      : issues.some((i) => i.status === "MONITORING")
+      ? "MONITORING"
+      : "RESOLVED";
 
   async function load() {
     try {
@@ -31,7 +55,9 @@ export default function Status({ me }) {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   function resetForm() {
     setEditingId(null);
@@ -54,16 +80,16 @@ export default function Status({ me }) {
       setErr("");
       setMsg("");
 
+      if (!title.trim() || !description.trim()) {
+        setErr("Title and description are required.");
+        return;
+      }
+
       const payload = {
         status,
         title: title.trim(),
         description: description.trim()
       };
-
-      if (!payload.title || !payload.description) {
-        setErr("Title and description are required.");
-        return;
-      }
 
       if (editingId) {
         await statusApi.update(editingId, payload);
@@ -82,13 +108,32 @@ export default function Status({ me }) {
 
   return (
     <div className="space-y-6">
-      {/* Public Status Feed */}
+      {/* STATUS FEED */}
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
         <div className="flex items-center justify-between gap-4">
-          <div>
-            <div className="text-lg font-semibold">Status</div>
-            <p className="text-sm text-slate-300 mt-1">Current incidents and updates.</p>
+          <div className="flex items-center gap-3">
+            {/* Overall pulsing dot */}
+            <span className="relative inline-flex h-3 w-3">
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
+                  statusDot(overallStatus).glow
+                }`}
+              />
+              <span
+                className={`relative inline-flex h-3 w-3 rounded-full ${
+                  statusDot(overallStatus).ring
+                }`}
+              />
+            </span>
+
+            <div>
+              <div className="text-lg font-semibold">Status</div>
+              <p className="text-sm text-slate-300 mt-1">
+                Live system incidents and updates.
+              </p>
+            </div>
           </div>
+
           <button
             onClick={load}
             className="rounded-xl px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm"
@@ -111,7 +156,24 @@ export default function Status({ me }) {
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="font-medium">{i.title}</div>
+                  <div className="flex items-center gap-2">
+                    {/* Incident dot */}
+                    <span className="relative inline-flex h-3 w-3">
+                      <span
+                        className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
+                          statusDot(i.status).glow
+                        }`}
+                      />
+                      <span
+                        className={`relative inline-flex h-3 w-3 rounded-full ${
+                          statusDot(i.status).ring
+                        }`}
+                      />
+                    </span>
+
+                    <div className="font-medium">{i.title}</div>
+                  </div>
+
                   <div className="text-xs text-slate-400 mt-1">
                     {new Date(i.created_at).toLocaleString()}
                   </div>
@@ -140,21 +202,24 @@ export default function Status({ me }) {
           ))}
 
           {!issues.length && !err && (
-            <div className="text-sm text-slate-300">No incidents reported.</div>
+            <div className="text-sm text-slate-300">
+              All systems operational.
+            </div>
           )}
         </div>
       </div>
 
-      {/* Owner Panel */}
+      {/* OWNER PANEL */}
       {isOwner && (
         <div className="rounded-2xl border border-amber-300/25 bg-amber-300/5 p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
               <div className="text-lg font-semibold">Owner Panel</div>
               <p className="text-sm text-slate-300 mt-1">
-                Create or update incidents shown on the Status page.
+                Create or update incidents shown publicly.
               </p>
             </div>
+
             <button
               onClick={resetForm}
               className="rounded-xl px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm"
@@ -168,6 +233,7 @@ export default function Status({ me }) {
               {msg}
             </div>
           )}
+
           {err && (
             <div className="mt-4 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-red-200 text-sm">
               {err}
@@ -214,7 +280,9 @@ export default function Status({ me }) {
 
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs text-slate-400">
-                {editingIssue ? `Editing issue #${editingIssue.id}` : "Creating new issue"}
+                {editingIssue
+                  ? `Editing issue #${editingIssue.id}`
+                  : "Creating new issue"}
               </div>
 
               <button
