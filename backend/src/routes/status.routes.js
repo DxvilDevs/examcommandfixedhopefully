@@ -2,6 +2,8 @@ import express from "express";
 import { z } from "zod";
 import { pool } from "../config/db.js";
 import { authRequired } from "../middleware/auth.js";
+import { requireRole } from "../middleware/requireRole.js";
+
 
 export const statsRoutes = express.Router();
 
