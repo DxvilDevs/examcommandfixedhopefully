@@ -8,6 +8,7 @@ import { statusRoutes } from "./routes/status.routes.js";
 import { legalRoutes } from "./routes/legal.routes.js";
 import { subscriptionRoutes } from "./routes/subscription.routes.js";
 import { errorHandler } from "./middleware/error.js";
+import { planRoutes } from "./routes/plan.routes.js";
 
 
 export function createApp() {
@@ -25,6 +26,7 @@ export function createApp() {
   app.use("/stats", statsRoutes);
   app.use("/status", statusRoutes);
   app.use("/legal", legalRoutes);
+  app.use("/plan", planRoutes);
   
   app.use(errorHandler);
 
