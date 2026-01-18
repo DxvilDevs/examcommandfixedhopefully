@@ -7,7 +7,7 @@ export default function Subscribe({ me, onUpdated }) {
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-      <div className="text-lg font-semibold">Subscribe</div>
+      <div className="text-lg font-semibold">Upgrade</div>
       <p className="text-sm text-slate-300 mt-1">🔓 Subscribe now and unlock additional statistics to aid your exams!</p>
 
       {msg && <div className="mt-4 text-sm text-green-200">{msg}</div>}
