@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { api } from "./api/client";
 
-import Layout from "./components/Layout.jsx";
-import Login from "./pages/Login.jsx";
-import Signup from "./pages/Signup.jsx";
-import Home from "./pages/Home.jsx";
-import Account from "./pages/Account.jsx";
-import Subscribe from "./pages/Subscribe.jsx";
-import Statistics from "./pages/Statistics.jsx";
-import Status from "./pages/Status.jsx";
-import Legal from "./pages/Legal.jsx";
-import NotFound from "./pages/NotFound.jsx";
-import Focus from "./pages/Focus.jsx";
+import Layout from "./components/Layout";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Home from "./pages/Home";
+import Account from "./pages/Account";
+import Subscribe from "./pages/Subscribe";
+import Statistics from "./pages/Statistics";
+import Status from "./pages/Status";
+import Legal from "./pages/Legal";
+import NotFound from "./pages/NotFound";
+import Focus from ".pages/Focus";
 
 export default function App() {
   const [me, setMe] = useState(null);
@@ -48,7 +48,7 @@ export default function App() {
           <Route path="statistics" element={<Statistics me={me} />} />
           <Route path="status" element={<Status me={me} />} />
           <Route path="legal/:key" element={<Legal me={me} />} />
-          <Route path="/focus" element={<Focus me={me} />} />
+          <Route path="focus" element={Focus me={me} />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
