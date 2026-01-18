@@ -18,6 +18,7 @@ export default function Sidebar() {
         <NavLink to="/account" className={linkCls}>🪄 Account</NavLink>
         <NavLink to="/legal/TOS" className={linkCls}>📜 TOS</NavLink>
         <NavLink to="/legal/PRIVACY" className={linkCls}>📜 Privacy</NavLink>
+        <NavLink to="/focus" className={linkCls}>📵 Focus</NavLink>
       </nav>
     </aside>
   );
