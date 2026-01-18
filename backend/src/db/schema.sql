@@ -79,3 +79,17 @@ VALUES
   ('TOS', 'Terms of Service', 'Add your Terms of Service here.'),
   ('PRIVACY', 'Privacy Policy', 'Add your Privacy Policy here.')
 ON CONFLICT (key) DO NOTHING;
+
+-- Add confidence column for revisions (safe migration)
+ALTER TABLE IF EXISTS revisions
+  ADD COLUMN IF NOT EXISTS confidence INT NOT NULL DEFAULT 3;
+
+-- Store momentum history for analytics
+CREATE TABLE IF NOT EXISTS momentum_events (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  delta INT NOT NULL,
+  score_after INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
