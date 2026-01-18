@@ -12,7 +12,6 @@ import Statistics from "./pages/Statistics";
 import Status from "./pages/Status";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
-import Focus from ".pages/Focus";
 
 export default function App() {
   const [me, setMe] = useState(null);
@@ -48,7 +47,6 @@ export default function App() {
           <Route path="statistics" element={<Statistics me={me} />} />
           <Route path="status" element={<Status me={me} />} />
           <Route path="legal/:key" element={<Legal me={me} />} />
-          <Route path="focus" element={<Focus me={me} />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
