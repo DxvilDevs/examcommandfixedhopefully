@@ -20,13 +20,15 @@ export default function Topbar({ me, onMe }) {
             </span>
           </div>
         </div>
-
-        <button
-          onClick={() => { clearToken(); onMe(null); }}
-          className="rounded-xl px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-2">
+          <AlertsBell />
+          <button
+            onClick={() => { clearToken(); onMe(null); }}
+            className="rounded-xl px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   );
