@@ -48,7 +48,7 @@ export default function App() {
           <Route path="statistics" element={<Statistics me={me} />} />
           <Route path="status" element={<Status me={me} />} />
           <Route path="legal/:key" element={<Legal me={me} />} />
-          <Route path="focus/:key" element={<Focus me={me} />} />
+          <Route path="/focus" element={<Focus me={me} />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
