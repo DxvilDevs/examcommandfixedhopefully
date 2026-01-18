@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { dashboardApi } from "../api/dashboard";
+import TodaysPlanCard from "../components/Plan/TodaysPlanCard";
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -129,3 +130,5 @@ export default function Home() {
     </div>
   );
 }
+
+<TodaysPlanCard me={me} />
