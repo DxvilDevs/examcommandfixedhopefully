@@ -8,6 +8,7 @@ import { statusRoutes } from "./routes/status.routes.js";
 import { legalRoutes } from "./routes/legal.routes.js";
 import { subscriptionRoutes } from "./routes/subscription.routes.js";
 import { errorHandler } from "./middleware/error.js";
+import { billingRoutes } from "./routes/billing.routes.js";
 
 export function createApp() {
   const app = express();
@@ -24,7 +25,10 @@ export function createApp() {
   app.use("/stats", statsRoutes);
   app.use("/status", statusRoutes);
   app.use("/legal", legalRoutes);
+  app.use("/billing", billingRoutes);
 
   app.use(errorHandler);
+
+  
   return app;
 }
