@@ -1,6 +1,7 @@
 import React from "react";
 import { clearToken } from "../api/client";
 import Badge from "./Badge";
+import AlertsBell from "./Alerts/AlertsBell";
 
 export default function Topbar({ me, onMe }) {
   const premium = me.plan === "PREMIUM" || me.role === "OWNER";
