@@ -87,7 +87,6 @@ dashboardRoutes.post("/exams", authRequired, async (req, res) => {
 });
 
 dashboardRoutes.post("/momentum/adjust", authRequired, async (req, res) => {
-  // simple: +2 for focus, +1 for task done, -1 for missed day etc (frontend can choose)
   const schema = z.object({ delta: z.number().int().min(-20).max(20) });
   const p = schema.parse(req.body);
 
@@ -101,5 +100,14 @@ dashboardRoutes.post("/momentum/adjust", authRequired, async (req, res) => {
   );
 
   const r = await pool.query("SELECT score FROM momentum WHERE user_id=$1", [req.user.id]);
-  res.json({ score: r.rows[0].score });
+  const score = r.rows[0].score;
+
+  // ✅ log event
+  await pool.query(
+    `INSERT INTO momentum_events (user_id, delta, score_after)
+     VALUES ($1,$2,$3)`,
+    [req.user.id, p.delta, score]
+  );
+
+  res.json({ score });
 });
