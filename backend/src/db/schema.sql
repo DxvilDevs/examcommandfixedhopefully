@@ -92,3 +92,57 @@ CREATE TABLE IF NOT EXISTS momentum_events (
   score_after INT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+-- Study sessions (Focus Mode)
+CREATE TABLE IF NOT EXISTS focus_sessions (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  ended_at TIMESTAMP,
+  minutes INT NOT NULL DEFAULT 0,
+  task_label TEXT,
+  topic TEXT,
+  completed BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- Syllabus / topic tree
+CREATE TABLE IF NOT EXISTS syllabus_nodes (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  parent_id INT REFERENCES syllabus_nodes(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Alerts
+CREATE TABLE IF NOT EXISTS alerts (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- OVERDUE | WEAK | OVERREVISION | EXAM_RISK
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  meta JSONB NOT NULL DEFAULT '{}'::jsonb,
+  read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Achievements
+CREATE TABLE IF NOT EXISTS achievements (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  key TEXT NOT NULL,
+  earned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, key)
+);
+
+-- Daily snapshots for weekly reports (optional but useful)
+CREATE TABLE IF NOT EXISTS daily_snapshots (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day DATE NOT NULL,
+  minutes_studied INT NOT NULL DEFAULT 0,
+  revisions_count INT NOT NULL DEFAULT 0,
+  momentum_score INT NOT NULL DEFAULT 0,
+  UNIQUE(user_id, day)
+);
