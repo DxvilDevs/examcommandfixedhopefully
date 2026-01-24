@@ -1,16 +1,37 @@
-GET  /api/flashcards/decks
-     → [{ id, name, cardCount, dueCount, topic }]
+// frontend/src/api/flashcards.js
+import { api } from "./client";
 
-POST /api/flashcards/decks
-     body: { name, topic }
-     → { id, name, cardCount: 0, dueCount: 0, topic }
+export async function getDecks() {
+  return api("/api/flashcards/decks", { method: "GET" });
+  // → [{ id, name, cardCount, dueCount, topic }]
+}
 
-GET  /api/flashcards/decks/:id/due
-     → [{ id, front, back, difficulty }]
+export async function createDeck(payload) {
+  // payload = { name: string, topic?: string }
+  return api("/api/flashcards/decks", {
+    method: "POST",
+    body: payload,
+  });
+}
 
-POST /api/flashcards/cards/:id/rate
-     body: { rating: "AGAIN" | "HARD" | "GOOD" | "EASY" }
-     → { nextReviewAt }
+export async function getDueCards(deckId) {
+  return api(`/api/flashcards/decks/${deckId}/due`, { method: "GET" });
+  // → [{ id, front, back, difficulty }]
+}
 
-POST /api/flashcards/cards
-     body: { deckId, front, back }
+export async function rateCard(cardId, rating) {
+  // rating = "AGAIN" | "HARD" | "GOOD" | "EASY"
+  return api(`/api/flashcards/cards/${cardId}/rate`, {
+    method: "POST",
+    body: { rating },
+  });
+  // → { nextReviewAt }
+}
+
+export async function createCard(payload) {
+  // payload = { deckId: string, front: string, back: string }
+  return api("/api/flashcards/cards", {
+    method: "POST",
+    body: payload,
+  });
+}
