@@ -6,6 +6,36 @@
   body {
     @apply bg-[#0a0a1f] text-slate-100;
   }
+  
+  /* Light mode overrides */
+  .light body {
+    @apply bg-slate-50 text-slate-900;
+  }
+  
+  .light .glass-card {
+    @apply bg-white/80 border-slate-200;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  }
+  
+  .light .glass-input {
+    @apply bg-slate-100 border-slate-200 text-slate-900;
+  }
+  
+  .light .glass-input:focus {
+    @apply border-slate-300 bg-white;
+  }
+  
+  .light .btn-secondary {
+    @apply bg-slate-200 border-slate-300 text-slate-900;
+  }
+  
+  .light .btn-secondary:hover {
+    @apply bg-slate-300;
+  }
+  
+  .light .glow-orb {
+    @apply opacity-10;
+  }
 }
 
 @layer utilities {
