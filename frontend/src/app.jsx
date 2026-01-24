@@ -15,6 +15,9 @@ import Status from "./pages/Status";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
 import Preview from "./pages/Preview";
+import Flashcards from "./pages/Flashcards";
+import Settings from "./pages/Settings";
+
 
 export default function App() {
   const [me, setMe] = useState(null);
@@ -78,11 +81,14 @@ export default function App() {
             <Route index element={<Home me={me} />} />
             <Route path="focus" element={<Focus me={me} />} />
             <Route path="preview" element={<Preview me={me} />} />
+            <Route path="flashcards" element={<Flashcards />} />
+            <Route path="settings" element={<Settings me={me} onUpdated={setMe} />} />
             <Route path="account" element={<Account me={me} onUpdated={setMe} />} />
             <Route path="subscribe" element={<Subscribe me={me} onUpdated={setMe} />} />
             <Route path="statistics" element={<Statistics me={me} />} />
             <Route path="status" element={<Status me={me} />} />
             <Route path="legal/:key" element={<Legal me={me} />} />
+          
           </Route>
 
           {/* ===== FALLBACK ===== */}
