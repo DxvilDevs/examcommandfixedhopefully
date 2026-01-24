@@ -14,7 +14,7 @@ import Statistics from "./pages/Statistics";
 import Status from "./pages/Status";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
-import Preview from "./pages/Preview";
+import Preview from "./pages/Preview"; 
 
 export default function App() {
   const [me, setMe] = useState(null);
