@@ -7,10 +7,15 @@ import { statsRoutes } from "./routes/stats.routes.js";
 import { statusRoutes } from "./routes/status.routes.js";
 import { legalRoutes } from "./routes/legal.routes.js";
 import { subscriptionRoutes } from "./routes/subscription.routes.js";
-import { errorHandler } from "./middleware/error.js";
 import { planRoutes } from "./routes/plan.routes.js";
 import { focusRoutes } from "./routes/focus.routes.js";
-import { alertsRoutes } from "./routes/alerts.routes.js"; // ✅ ADD
+import { alertsRoutes } from "./routes/alerts.routes.js";
+// ✅ NEW ROUTES
+import { gamificationRoutes } from "./routes/gamification.routes.js";
+import { flashcardsRoutes } from "./routes/flashcards.routes.js";
+import { tagsRoutes } from "./routes/tags.routes.js";
+import { emailRoutes } from "./routes/email.routes.js";
+import { errorHandler } from "./middleware/error.js";
 
 export function createApp() {
   const app = express();
@@ -32,6 +37,7 @@ export function createApp() {
 
   app.get("/health", (_req, res) => res.json({ ok: true }));
 
+  // Existing routes
   app.use("/auth", authRoutes);
   app.use("/user", userRoutes);
   app.use("/subscription", subscriptionRoutes);
@@ -41,9 +47,13 @@ export function createApp() {
   app.use("/legal", legalRoutes);
   app.use("/plan", planRoutes);
   app.use("/focus", focusRoutes);
-
-  // ✅ ADD alerts stub
   app.use("/alerts", alertsRoutes);
+
+  // ✅ NEW FEATURE ROUTES
+  app.use("/gamification", gamificationRoutes);
+  app.use("/flashcards", flashcardsRoutes);
+  app.use("/tags", tagsRoutes);
+  app.use("/email", emailRoutes);
 
   app.use(errorHandler);
 
