@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { dashboardApi } from "../api/dashboard";
+import GamificationCard from "../components/GamificationCard";
+import DailyPlannerCard from "../components/DailyPlannerCard";
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -41,8 +43,8 @@ export default function Home() {
       )}
 
       {/* Import gamification and planner at top */}
-      {/* <GamificationCard /> */}
-      {/* <DailyPlannerCard me={me} /> */}
+      <GamificationCard />
+      <DailyPlannerCard me={me} />
 
       {/* Gradient stat cards */}
       <div className="grid md:grid-cols-3 gap-6">
