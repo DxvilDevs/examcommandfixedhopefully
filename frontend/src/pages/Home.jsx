@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { dashboardApi } from "../api/dashboard";
 
+return (
+  <div className="space-y-6">
+    <div className="text-3xl font-bold text-red-500">
+      🚨 HOME FILE IS LOADED 🚨
+    </div>
+  </div>
+  
 function daysUntil(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
