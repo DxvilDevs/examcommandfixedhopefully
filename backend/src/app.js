@@ -10,11 +10,24 @@ import { subscriptionRoutes } from "./routes/subscription.routes.js";
 import { errorHandler } from "./middleware/error.js";
 import { planRoutes } from "./routes/plan.routes.js";
 import { focusRoutes } from "./routes/focus.routes.js";
+import { alertsRoutes } from "./routes/alerts.routes.js"; // ✅ ADD
 
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: true, credentials: false }));
+  /* ======================
+     CORS (safe for GitHub Pages)
+  ====================== */
+  app.use(cors({
+    origin: [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "https://dxvildevs.github.io"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  }));
+
   app.use(express.json({ limit: "1mb" }));
 
   app.get("/health", (_req, res) => res.json({ ok: true }));
@@ -29,9 +42,10 @@ export function createApp() {
   app.use("/plan", planRoutes);
   app.use("/focus", focusRoutes);
 
-  
+  // ✅ ADD alerts stub
+  app.use("/alerts", alertsRoutes);
+
   app.use(errorHandler);
 
-  
   return app;
 }
