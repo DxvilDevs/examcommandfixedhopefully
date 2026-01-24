@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { api } from "./api/client";
 
+/* Layout + Pages */
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
+import Focus from "./pages/Focus";
 import Account from "./pages/Account";
 import Subscribe from "./pages/Subscribe";
 import Statistics from "./pages/Statistics";
 import Status from "./pages/Status";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
-import Focus from "./pages/Focus";
 
 export default function App() {
   const [me, setMe] = useState(null);
@@ -20,8 +21,8 @@ export default function App() {
 
   async function refreshMe() {
     try {
-      const u = await api("/user/me");
-      setMe(u);
+      const user = await api("/user/me");
+      setMe(user);
     } catch {
       setMe(null);
     } finally {
@@ -45,17 +46,21 @@ export default function App() {
     <HashRouter>
       <div className="min-h-screen bg-slate-950 text-slate-100">
         <Routes>
-          {/* Auth */}
+          {/* ===== AUTH ===== */}
           <Route
             path="/login"
-            element={me ? <Navigate to="/" replace /> : <Login onAuthed={refreshMe} />}
+            element={
+              me ? <Navigate to="/" replace /> : <Login onAuthed={refreshMe} />
+            }
           />
           <Route
             path="/signup"
-            element={me ? <Navigate to="/" replace /> : <Signup onAuthed={refreshMe} />}
+            element={
+              me ? <Navigate to="/" replace /> : <Signup onAuthed={refreshMe} />
+            }
           />
 
-          {/* App shell */}
+          {/* ===== APP SHELL (SIDEBAR + TOPBAR) ===== */}
           <Route
             path="/"
             element={
@@ -67,6 +72,7 @@ export default function App() {
             }
           >
             <Route index element={<Home me={me} />} />
+            <Route path="focus" element={<Focus me={me} />} />
             <Route path="account" element={<Account me={me} onUpdated={setMe} />} />
             <Route path="subscribe" element={<Subscribe me={me} onUpdated={setMe} />} />
             <Route path="statistics" element={<Statistics me={me} />} />
@@ -74,10 +80,7 @@ export default function App() {
             <Route path="legal/:key" element={<Legal me={me} />} />
           </Route>
 
-          {/* Focus mode (outside layout intentionally) */}
-          <Route path="/focus" element={me ? <Focus me={me} /> : <Navigate to="/login" replace />} />
-
-          {/* Fallback */}
+          {/* ===== FALLBACK ===== */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
