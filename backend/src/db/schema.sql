@@ -146,3 +146,20 @@ CREATE TABLE IF NOT EXISTS daily_snapshots (
   momentum_score INT NOT NULL DEFAULT 0,
   UNIQUE(user_id, day)
 );
+
+-- =========================
+-- Focus Sessions (v2)
+-- =========================
+CREATE TABLE IF NOT EXISTS focus_sessions_v2 (
+  id          SERIAL PRIMARY KEY,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  topic       TEXT,
+  task_label  TEXT,
+  started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ended_at    TIMESTAMPTZ,
+  minutes     INTEGER,
+  completed   BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE INDEX IF NOT EXISTS idx_focus_sessions_v2_user_id_started_at
+  ON focus_sessions_v2 (user_id, started_at DESC);
