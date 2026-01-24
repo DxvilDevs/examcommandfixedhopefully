@@ -1,37 +1,52 @@
-// frontend/src/api/flashcards.js
-import { api } from "./client";
+// ============================================
+// flashcards.js
+// ============================================
+export const flashcardsApi = {
+  async getDecks() {
+    return api("/flashcards/decks");
+  },
 
-export async function getDecks() {
-  return api("/api/flashcards/decks", { method: "GET" });
-  // → [{ id, name, cardCount, dueCount, topic }]
-}
+  async createDeck(name, topic) {
+    return api("/flashcards/decks", {
+      method: "POST",
+      body: JSON.stringify({ name, topic })
+    });
+  },
 
-export async function createDeck(payload) {
-  // payload = { name: string, topic?: string }
-  return api("/api/flashcards/decks", {
-    method: "POST",
-    body: payload,
-  });
-}
+  async updateDeck(id, data) {
+    return api(`/flashcards/decks/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data)
+    });
+  },
 
-export async function getDueCards(deckId) {
-  return api(`/api/flashcards/decks/${deckId}/due`, { method: "GET" });
-  // → [{ id, front, back, difficulty }]
-}
+  async deleteDeck(id) {
+    return api(`/flashcards/decks/${id}`, {
+      method: "DELETE"
+    });
+  },
 
-export async function rateCard(cardId, rating) {
-  // rating = "AGAIN" | "HARD" | "GOOD" | "EASY"
-  return api(`/api/flashcards/cards/${cardId}/rate`, {
-    method: "POST",
-    body: { rating },
-  });
-  // → { nextReviewAt }
-}
+  async getDueCards(deckId) {
+    return api(`/flashcards/decks/${deckId}/due`);
+  },
 
-export async function createCard(payload) {
-  // payload = { deckId: string, front: string, back: string }
-  return api("/api/flashcards/cards", {
-    method: "POST",
-    body: payload,
-  });
-}
+  async createCard(deckId, front, back) {
+    return api("/flashcards/cards", {
+      method: "POST",
+      body: JSON.stringify({ deckId, front, back })
+    });
+  },
+
+  async rateCard(cardId, rating) {
+    return api(`/flashcards/cards/${cardId}/rate`, {
+      method: "POST",
+      body: JSON.stringify({ rating })
+    });
+  },
+
+  async deleteCard(cardId) {
+    return api(`/flashcards/cards/${cardId}`, {
+      method: "DELETE"
+    });
+  }
+};
