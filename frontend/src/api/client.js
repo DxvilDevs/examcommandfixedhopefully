@@ -6,10 +6,15 @@ const API_URL = import.meta.env.VITE_API_URL;
  * Token helpers
  */
 export function getToken() {
-  return localStorage.getItem("ecc_token");
+  return (
+    localStorage.getItem("ecc_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken")
+  );
 }
 
 export function setToken(token) {
+  if (!token) return;
   localStorage.setItem("ecc_token", token);
 }
 
@@ -22,7 +27,7 @@ export function clearToken() {
  */
 export async function api(path, { method = "GET", body } = {}) {
   if (!API_URL) {
-    throw new Error("VITE_API_URL is not set (check GitHub Actions variable)");
+    throw new Error("VITE_API_URL is not set (check GitHub Actions variables)");
   }
 
   const headers = {
@@ -36,18 +41,18 @@ export async function api(path, { method = "GET", body } = {}) {
 
   let response;
 
-  // Network-level error (API unreachable)
+  // Network-level failure (API unreachable, CORS, DNS, etc.)
   try {
     response = await fetch(`${API_URL}${path}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined
     });
-  } catch (err) {
+  } catch {
     throw new Error("Network error: cannot reach API server");
   }
 
-  // Read response safely
+  // Safely read response
   const text = await response.text();
   let data = {};
 
@@ -57,7 +62,7 @@ export async function api(path, { method = "GET", body } = {}) {
     data = { raw: text };
   }
 
-  // HTTP-level error (API responded with error)
+  // HTTP error from API
   if (!response.ok) {
     throw new Error(
       data?.error ||
