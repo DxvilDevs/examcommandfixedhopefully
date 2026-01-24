@@ -14,7 +14,7 @@ import Statistics from "./pages/Statistics";
 import Status from "./pages/Status";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
-import Preview from "./pages/Preview"; 
+import Preview from "./pages/Preview";
 
 export default function App() {
   const [me, setMe] = useState(null);
@@ -37,15 +37,18 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-200 grid place-items-center">
-        Loading…
+      <div className="min-h-screen bg-[#0a0a1f] text-slate-200 grid place-items-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="text-slate-400">Loading...</div>
+        </div>
       </div>
     );
   }
 
   return (
     <HashRouter>
-      <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="min-h-screen bg-[#0a0a1f] text-slate-100">
         <Routes>
           {/* ===== AUTH ===== */}
           <Route
