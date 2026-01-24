@@ -30,6 +30,14 @@ export default function Sidebar() {
           <span className="text-lg">📊</span>
           <span>Statistics</span>
         </NavLink>
+        <NavLink to="/flashcards" className={linkCls}>
+          <span className="text-lg">🎴</span>
+          <span>Flashcards</span>
+        </NavLink>
+        <NavLink to="/settings" className={linkCls}>
+          <span className="text-lg">⚙️</span>
+          <span>Settings</span>
+        </NavLink>
         <NavLink to="/subscribe" className={linkCls}>
           <span className="text-lg">⭐</span>
           <span>Upgrade</span>
