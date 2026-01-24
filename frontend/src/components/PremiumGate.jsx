@@ -6,24 +6,44 @@ export default function PremiumGate({ me, children }) {
 
   return (
     <div className="relative">
-      <div className={premium ? "" : "blur-sm pointer-events-none select-none"}>
+      <div className={premium ? "" : "blur-md pointer-events-none select-none"}>
         {children}
       </div>
 
       {!premium && (
         <div className="absolute inset-0 grid place-items-center p-6">
-          <div className="max-w-md w-full rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl p-6 shadow-xl">
-            <div className="text-lg font-semibold">Premium Statistics</div>
-            <p className="text-sm text-slate-300 mt-2">
-              This page is locked for Free users. Upgrade to Premium (£3) to unlock analytics,
-              forgetting curve reminders, and deeper insights.
-            </p>
-            <Link
-              to="/subscribe"
-              className="inline-flex mt-4 items-center justify-center rounded-xl px-4 py-2 bg-indigo-500/90 hover:bg-indigo-500 transition font-medium"
-            >
-              Upgrade to Premium
-            </Link>
+          <div className="max-w-md w-full glass-card p-8 shadow-2xl border-amber-300/20">
+            {/* Glow effect */}
+            <div className="absolute -inset-20 opacity-20 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-yellow-400 to-orange-500 rounded-full blur-3xl" />
+            </div>
+            
+            <div className="relative">
+              <div className="text-center mb-4">
+                <div className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-amber-300/20 to-yellow-400/20 mb-4">
+                  <span className="text-4xl">⭐</span>
+                </div>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-center gold-gradient bg-clip-text text-transparent mb-3">
+                Premium Statistics
+              </h3>
+              
+              <p className="text-sm text-slate-300 text-center mb-6">
+                Unlock advanced analytics, forgetting curve insights, and AI-powered revision planning for just £3/month.
+              </p>
+              
+              <Link
+                to="/subscribe"
+                className="btn-primary w-full text-center block"
+              >
+                Upgrade to Premium
+              </Link>
+              
+              <div className="mt-4 text-xs text-slate-400 text-center">
+                Unlock intelligent study insights
+              </div>
+            </div>
           </div>
         </div>
       )}
