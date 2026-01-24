@@ -1,27 +1,42 @@
-// frontend/src/api/tags.js
-import { api } from "./client";
+// ============================================
+// tags.js
+// ============================================
+export const tagsApi = {
+  async getTags() {
+    return api("/tags");
+  },
 
-export async function getTags() {
-  return api("/api/tags", { method: "GET" });
-  // → [{ id, name, color, count }]
-}
+  async createTag(name, color) {
+    return api("/tags", {
+      method: "POST",
+      body: JSON.stringify({ name, color })
+    });
+  },
 
-export async function createTag(payload) {
-  // payload = { name: string, color: string (e.g. "#FF6B6B") }
-  return api("/api/tags", {
-    method: "POST",
-    body: payload,
-  });
-}
+  async updateTag(id, data) {
+    return api(`/tags/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data)
+    });
+  },
 
-export async function updateTag(tagId, payload) {
-  // payload = { name?: string, color?: string }
-  return api(`/api/tags/${tagId}`, {
-    method: "PUT",
-    body: payload,
-  });
-}
+  async deleteTag(id) {
+    return api(`/tags/${id}`, {
+      method: "DELETE"
+    });
+  },
 
-export async function deleteTag(tagId) {
-  return api(`/api/tags/${tagId}`, { method: "DELETE" });
-}
+  async attachTag(tagId, entityType, entityId) {
+    return api(`/tags/${tagId}/attach`, {
+      method: "POST",
+      body: JSON.stringify({ entityType, entityId })
+    });
+  },
+
+  async detachTag(tagId, entityType, entityId) {
+    return api(`/tags/${tagId}/detach`, {
+      method: "DELETE",
+      body: JSON.stringify({ entityType, entityId })
+    });
+  }
+};
