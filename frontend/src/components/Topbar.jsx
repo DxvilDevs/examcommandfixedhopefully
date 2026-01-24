@@ -33,6 +33,7 @@ export default function Topbar({ me, onLogout }) {
         
         <div className="flex items-center gap-3">
           <AlertsBell />
+          {/* <ThemeToggle /> */}
           <button
             onClick={() => {
               clearToken();
