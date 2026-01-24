@@ -5,6 +5,9 @@ import { authRequired } from "../middleware/auth.js";
 
 export const focusRoutes = express.Router();
 
+/* ===========================
+   START FOCUS SESSION
+=========================== */
 focusRoutes.post("/start", authRequired, async (req, res) => {
   const p = z.object({
     topic: z.string().max(80).optional(),
@@ -14,12 +17,16 @@ focusRoutes.post("/start", authRequired, async (req, res) => {
   const r = await pool.query(
     `INSERT INTO focus_sessions (user_id, topic, task_label)
      VALUES ($1,$2,$3)
-     RETURNING id, started_at`,
-    [req.user.id, p.topic || null, p.task_label || null]
+     RETURNING id, started_at, topic`,
+    [req.user.id, p.topic || "Focus Session", p.task_label || null]
   );
+
   res.json(r.rows[0]);
 });
 
+/* ===========================
+   END FOCUS SESSION
+=========================== */
 focusRoutes.post("/end", authRequired, async (req, res) => {
   const p = z.object({
     id: z.number().int(),
@@ -29,21 +36,23 @@ focusRoutes.post("/end", authRequired, async (req, res) => {
 
   const r = await pool.query(
     `UPDATE focus_sessions
-     SET ended_at=NOW(),
-         minutes=$1,
-         completed=$2
-     WHERE id=$3 AND user_id=$4
-     RETURNING id, minutes, completed`,
+     SET ended_at = NOW(),
+         minutes = $1,
+         completed = $2
+     WHERE id = $3 AND user_id = $4
+     RETURNING id, minutes, completed, topic`,
     [p.minutes, p.completed ?? true, p.id, req.user.id]
   );
 
-  if (!r.rows[0]) return res.status(404).json({ error: "Session not found" });
+  if (!r.rows[0]) {
+    return res.status(404).json({ error: "Session not found" });
+  }
 
-  // Also insert into revisions to feed stats engine (auto-log)
+  // Auto-log into revisions using the SAME topic
   await pool.query(
     `INSERT INTO revisions (user_id, topic, minutes, confidence)
      VALUES ($1,$2,$3,$4)`,
-    [req.user.id, "Focus Session", p.minutes, 3]
+    [req.user.id, r.rows[0].topic || "Focus Session", p.minutes, 3]
   );
 
   res.json({ ok: true });
