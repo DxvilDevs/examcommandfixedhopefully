@@ -15,7 +15,8 @@ export default function Legal({ me }) {
   useEffect(() => {
     (async () => {
       try {
-        setErr(""); setMsg("");
+        setErr("");
+        setMsg("");
         const r = await legalApi.get(key);
         setDoc(r);
         setTitle(r.title);
@@ -27,41 +28,65 @@ export default function Legal({ me }) {
   }, [key]);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-      <div className="text-lg font-semibold">{doc?.title || "Legal"}</div>
-      {err && <div className="mt-4 text-sm text-red-200">{err}</div>}
-      {msg && <div className="mt-4 text-sm text-green-200">{msg}</div>}
+    <div className="glass-card p-8 shadow-xl">
+      <h1 className="text-2xl font-bold text-white mb-4">{doc?.title || "Legal Document"}</h1>
+      
+      {err && (
+        <div className="mb-4 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">
+          {err}
+        </div>
+      )}
+      {msg && (
+        <div className="mb-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+          {msg}
+        </div>
+      )}
 
       {doc && (
-        <div className="mt-4">
+        <div className="mt-6">
           {isOwner ? (
-            <div className="space-y-3">
-              <input
-                className="w-full rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2 outline-none"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <textarea
-                className="w-full min-h-[260px] rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2 outline-none"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Title</label>
+                <input
+                  className="glass-input w-full"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Content</label>
+                <textarea
+                  className="glass-input w-full min-h-[400px] font-mono text-sm"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                />
+              </div>
+              
               <button
-                className="rounded-xl px-3 py-2 bg-indigo-500/90 hover:bg-indigo-500 transition font-medium"
+                className="btn-primary"
                 onClick={async () => {
                   try {
-                    setErr(""); setMsg("");
+                    setErr("");
+                    setMsg("");
                     const updated = await legalApi.update(key, { title, content });
                     setDoc(updated);
-                    setMsg("Updated.");
-                  } catch (e) { setErr(e.message); }
+                    setMsg("Document updated successfully.");
+                  } catch (e) {
+                    setErr(e.message);
+                  }
                 }}
               >
-                Save
+                Save Changes
               </button>
             </div>
           ) : (
-            <pre className="whitespace-pre-wrap text-sm text-slate-200">{doc.content}</pre>
+            <div className="prose prose-invert prose-slate max-w-none">
+              <pre className="whitespace-pre-wrap text-sm text-slate-200 bg-white/5 rounded-2xl p-6 border border-white/10">
+                {doc.content}
+              </pre>
+            </div>
           )}
         </div>
       )}
