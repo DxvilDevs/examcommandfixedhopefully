@@ -74,7 +74,7 @@ export default function App() {
           >
             <Route index element={<Home me={me} />} />
             <Route path="focus" element={<Focus me={me} />} />
-            <Route path="preview" element={<Preview />} />
+            <Route path="preview" element={<Preview me={me} />} />
             <Route path="account" element={<Account me={me} onUpdated={setMe} />} />
             <Route path="subscribe" element={<Subscribe me={me} onUpdated={setMe} />} />
             <Route path="statistics" element={<Statistics me={me} />} />
