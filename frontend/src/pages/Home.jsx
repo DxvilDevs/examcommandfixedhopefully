@@ -44,8 +44,7 @@ export default function Home() {
 
       {/* Import gamification and planner at top */}
       <GamificationCard />
-      <DailyPlannerCard me={me} />
-
+      
       {/* Gradient stat cards */}
       <div className="grid md:grid-cols-3 gap-6">
         {/* Next Exam Card */}
