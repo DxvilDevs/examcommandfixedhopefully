@@ -96,9 +96,10 @@ async function checkAchievements(userId) {
   if (!stats) return [];
 
   const { rows: achievements } = await pool.query(
-    `SELECT a.*, ua.id as unlocked_id 
-     FROM achievements a 
-     LEFT JOIN user_achievements ua ON a.id = ua.achievement_id AND ua.user_id = $1`,
+    `SELECT ad.*, a.id as unlocked_id, a.earned_at as unlocked_at
+     FROM achievement_definitions ad 
+     LEFT JOIN achievements a ON ad.key = a.key AND a.user_id = $1
+     ORDER BY ad.id`,
     [userId]
   );
 
@@ -144,12 +145,12 @@ async function checkAchievements(userId) {
 
     if (shouldUnlock) {
       await pool.query(
-        `INSERT INTO user_achievements (user_id, achievement_id) VALUES ($1, $2)`,
-        [userId, ach.id]
+        `INSERT INTO achievements (user_id, key) VALUES ($1, $2)`,
+        [userId, ach.key]
       );
       newlyUnlocked.push({
         id: ach.id,
-        name: ach.name,
+        name: ach.title,
         description: ach.description,
         icon: ach.icon
       });
@@ -196,13 +197,13 @@ gamificationRoutes.get("/stats", authRequired, async (req, res) => {
   const achievementsWithProgress = achievements.map(ach => {
     const base = {
       id: ach.id,
-      name: ach.name,
+      name: ach.title,
       icon: ach.icon,
       description: ach.description,
-      unlocked: ach.unlocked
+      unlocked: !!ach.unlocked_id
     };
 
-    if (ach.unlocked) return base;
+    if (ach.unlocked_id) return base;
 
     let progress = 0;
     switch (ach.key) {
