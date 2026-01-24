@@ -5,6 +5,34 @@ import { authRequired } from "../middleware/auth.js";
 
 export const dashboardRoutes = express.Router();
 
+// Helper: Log gamification activity
+async function logGamificationActivity(userId, type, metadata = {}) {
+  try {
+    // Check if user_gamification record exists
+    const { rows } = await pool.query(
+      `SELECT id FROM user_gamification WHERE user_id = $1`,
+      [userId]
+    );
+
+    if (!rows[0]) {
+      // Create initial record
+      await pool.query(
+        `INSERT INTO user_gamification (user_id) VALUES ($1)`,
+        [userId]
+      );
+    }
+
+    // This would call the gamification logic - for now just log
+    await pool.query(
+      `INSERT INTO xp_activities (user_id, activity_type, xp_gained, description) 
+       VALUES ($1, $2, $3, $4)`,
+      [userId, type, 10, `Activity: ${type}`]
+    );
+  } catch (err) {
+    console.error('Failed to log gamification activity:', err);
+  }
+}
+
 dashboardRoutes.get("/home", authRequired, async (req, res) => {
   const uid = req.user.id;
 
@@ -67,6 +95,12 @@ dashboardRoutes.put("/tasks/:id/toggle", authRequired, async (req, res) => {
      RETURNING id, title, done, estimate_minutes, created_at`,
     [id, req.user.id]
   );
+
+  // ✅ If task was just completed, log gamification activity
+  if (r.rows[0] && r.rows[0].done) {
+    await logGamificationActivity(req.user.id, 'TASK');
+  }
+
   res.json(r.rows[0] || null);
 });
 
@@ -102,7 +136,6 @@ dashboardRoutes.post("/momentum/adjust", authRequired, async (req, res) => {
   const r = await pool.query("SELECT score FROM momentum WHERE user_id=$1", [req.user.id]);
   const score = r.rows[0].score;
 
-  // ✅ log event
   await pool.query(
     `INSERT INTO momentum_events (user_id, delta, score_after)
      VALUES ($1,$2,$3)`,
