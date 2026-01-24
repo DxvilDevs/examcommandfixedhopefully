@@ -182,23 +182,21 @@ CREATE TABLE IF NOT EXISTS user_gamification (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS achievements (
+-- Note: Using simpler achievements table to match your existing pattern
+CREATE TABLE IF NOT EXISTS achievement_definitions (
     id SERIAL PRIMARY KEY,
     key TEXT UNIQUE NOT NULL,
-    name TEXT NOT NULL,
+    title TEXT NOT NULL,
     description TEXT,
     icon TEXT,
     target_value INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS user_achievements (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    achievement_id INTEGER REFERENCES achievements(id) ON DELETE CASCADE,
-    unlocked_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    UNIQUE(user_id, achievement_id)
-);
+-- Note: Reusing your existing 'achievements' table pattern
+-- Just ensure it has user_id and key columns
+ALTER TABLE IF EXISTS achievements 
+  ADD COLUMN IF NOT EXISTS key TEXT;
 
 CREATE TABLE IF NOT EXISTS xp_activities (
     id SERIAL PRIMARY KEY,
@@ -209,8 +207,8 @@ CREATE TABLE IF NOT EXISTS xp_activities (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Seed achievements
-INSERT INTO achievements (key, name, description, icon, target_value) VALUES
+-- Seed achievement definitions
+INSERT INTO achievement_definitions (key, title, description, icon, target_value) VALUES
 ('first_steps', 'First Steps', 'Complete your first task', '🎯', 1),
 ('week_warrior', 'Week Warrior', 'Maintain a 7-day streak', '🔥', 7),
 ('fortnight_focus', 'Fortnight Focus', 'Maintain a 14-day streak', '⚡', 14),
