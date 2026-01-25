@@ -9,14 +9,14 @@ export const flashcardsApi = {
   async createDeck(name, topic) {
     return api("/flashcards/decks", {
       method: "POST",
-      body: JSON.stringify({ name, topic })
+      body: { name, topic }
     });
   },
 
   async updateDeck(id, data) {
     return api(`/flashcards/decks/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data)
+      body: data
     });
   },
 
@@ -33,14 +33,14 @@ export const flashcardsApi = {
   async createCard(deckId, front, back) {
     return api("/flashcards/cards", {
       method: "POST",
-      body: JSON.stringify({ deckId, front, back })
+      body: { deckId, front, back }
     });
   },
 
   async rateCard(cardId, rating) {
     return api(`/flashcards/cards/${cardId}/rate`, {
       method: "POST",
-      body: JSON.stringify({ rating })
+      body: { rating }
     });
   },
 
