@@ -1,7 +1,6 @@
-// src/routes/plannerEnhanced.routes.js
-const express = require('express');
-const auth = require('../middleware/auth');
-const db = require('../config/db');
+import express from 'express';
+import auth from '../middleware/auth.js';
+import db from '../config/db.js';
 
 const router = express.Router();
 
@@ -11,7 +10,6 @@ router.get('/sequence', auth, async (req, res) => {
     const userId = req.user.id;
     const targetMinutes = parseInt(req.query.minutes) || 90;
 
-    // Simple mock logic: fetch weak topics from revisions/flashcards
     const { rows: weakTopics } = await db.query(`
       SELECT topic, AVG(confidence) as avg_conf 
       FROM revisions 
@@ -24,9 +22,9 @@ router.get('/sequence', auth, async (req, res) => {
 
     const blocks = weakTopics.map((t, i) => ({
       topic: t.topic,
-      minutes: Math.round(targetMinutes / weakTopics.length),
+      minutes: Math.round(targetMinutes / weakTopics.length) || 25,
       priority: i === 0 ? 'HIGH' : 'MEDIUM',
-      reason: `Low confidence (${t.avg_conf.toFixed(1)})`
+      reason: `Low confidence (${(t.avg_conf || 2.5).toFixed(1)})`
     }));
 
     res.json({
@@ -39,16 +37,4 @@ router.get('/sequence', auth, async (req, res) => {
   }
 });
 
-// POST /planner/block/start
-router.post('/block/start', auth, async (req, res) => {
-  // Implement if needed, e.g. log start
-  res.json({ success: true });
-});
-
-// POST /planner/block/complete
-router.post('/block/complete', auth, async (req, res) => {
-  // Implement if needed, e.g. update gamification
-  res.json({ success: true });
-});
-
-module.exports = router;
+export const plannerEnhancedRoutes = router;
