@@ -25,8 +25,8 @@ plannerEnhancedRoutes.get("/sequence", authRequired, async (req, res) => {
       topic: t.topic,
       minutes: Math.round(targetMinutes / weakTopics.length) || 25,
       priority: i === 0 ? "HIGH" : "MEDIUM",
-      reason: `Low confidence (${(t.avg_conf || 2.5).toFixed(1)})`
-    }));
+      reason: `Low confidence (${Number(t.avg_conf || 2.5).toFixed(1)})`
+}));
 
     res.json({
       blocks,
