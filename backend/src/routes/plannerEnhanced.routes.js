@@ -1,6 +1,6 @@
-import express from 'express';
-import auth from '../middleware/auth.js';
-import db from '../config/db.js';
+const express = require('express');
+const auth = require('../middleware/auth');
+const db = require('../config/db');
 
 const router = express.Router();
 
@@ -37,4 +37,4 @@ router.get('/sequence', auth, async (req, res) => {
   }
 });
 
-export const plannerEnhancedRoutes = router;
+module.exports = router;
