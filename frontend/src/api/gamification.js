@@ -11,7 +11,7 @@ export const gamificationApi = {
   async logActivity(type, metadata = {}) {
     return api("/gamification/log-activity", {
       method: "POST",
-      body: JSON.stringify({ type, metadata })
+      body: { type, metadata }
     });
   }
 };
