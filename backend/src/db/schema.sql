@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS revisions (
   user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   topic TEXT NOT NULL,
   minutes INT NOT NULL DEFAULT 30,
+  confidence INT DEFAULT 3,
   revised_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -38,7 +39,8 @@ CREATE TABLE IF NOT EXISTS focus_sessions (
   user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   mode TEXT NOT NULL DEFAULT 'POMODORO',       -- POMODORO | DEEP
   minutes INT NOT NULL,
-  started_at TIMESTAMP NOT NULL DEFAULT NOW()
+  started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  ended_at TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS momentum (
@@ -68,191 +70,92 @@ CREATE TABLE IF NOT EXISTS issue_events (
 
 CREATE TABLE IF NOT EXISTS legal_docs (
   id SERIAL PRIMARY KEY,
-  key TEXT UNIQUE NOT NULL,    -- TOS | PRIVACY
+  key TEXT UNIQUE NOT NULL,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-
-INSERT INTO legal_docs (key, title, content)
-VALUES
-  ('TOS', 'Terms of Service', 'Add your Terms of Service here.'),
-  ('PRIVACY', 'Privacy Policy', 'Add your Privacy Policy here.')
-ON CONFLICT (key) DO NOTHING;
-
--- Add confidence column for revisions (safe migration)
-ALTER TABLE IF EXISTS revisions
-  ADD COLUMN IF NOT EXISTS confidence INT NOT NULL DEFAULT 3;
-
--- Store momentum history for analytics
-CREATE TABLE IF NOT EXISTS momentum_events (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  delta INT NOT NULL,
-  score_after INT NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
--- Study sessions (Focus Mode)
-CREATE TABLE IF NOT EXISTS focus_sessions (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  started_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  ended_at TIMESTAMP,
-  minutes INT NOT NULL DEFAULT 0,
-  task_label TEXT,
-  topic TEXT,
-  completed BOOLEAN NOT NULL DEFAULT FALSE
-);
-
--- Syllabus / topic tree
-CREATE TABLE IF NOT EXISTS syllabus_nodes (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  parent_id INT REFERENCES syllabus_nodes(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
--- Alerts
-CREATE TABLE IF NOT EXISTS alerts (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  type TEXT NOT NULL, -- OVERDUE | WEAK | OVERREVISION | EXAM_RISK
-  title TEXT NOT NULL,
-  body TEXT NOT NULL,
-  meta JSONB NOT NULL DEFAULT '{}'::jsonb,
-  read BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
--- Achievements
-CREATE TABLE IF NOT EXISTS achievements (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  key TEXT NOT NULL,
-  earned_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id, key)
-);
-
--- Daily snapshots for weekly reports (optional but useful)
-CREATE TABLE IF NOT EXISTS daily_snapshots (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  day DATE NOT NULL,
-  minutes_studied INT NOT NULL DEFAULT 0,
-  revisions_count INT NOT NULL DEFAULT 0,
-  momentum_score INT NOT NULL DEFAULT 0,
-  UNIQUE(user_id, day)
-);
-
--- =========================
--- Focus Sessions (v2)
--- =========================
-CREATE TABLE IF NOT EXISTS focus_sessions_v2 (
-  id          SERIAL PRIMARY KEY,
-  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  topic       TEXT,
-  task_label  TEXT,
-  started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  ended_at    TIMESTAMPTZ,
-  minutes     INTEGER,
-  completed   BOOLEAN NOT NULL DEFAULT TRUE
-);
-
-CREATE INDEX IF NOT EXISTS idx_focus_sessions_v2_user_id_started_at
-  ON focus_sessions_v2 (user_id, started_at DESC);
 
 -- ==========================================
 -- GAMIFICATION TABLES
 -- ==========================================
 
 CREATE TABLE IF NOT EXISTS user_gamification (
-    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    level INTEGER NOT NULL DEFAULT 1,
-    total_xp INTEGER NOT NULL DEFAULT 0,
-    current_streak INTEGER NOT NULL DEFAULT 0,
-    longest_streak INTEGER NOT NULL DEFAULT 0,
-    last_activity_date DATE,
-    total_study_hours NUMERIC(10,2) NOT NULL DEFAULT 0,
-    tasks_completed INTEGER NOT NULL DEFAULT 0,
-    focus_sessions_completed INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  id SERIAL PRIMARY KEY,
+  user_id INT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  xp_total BIGINT NOT NULL DEFAULT 0,
+  level INT NOT NULL DEFAULT 1,
+  current_streak INT NOT NULL DEFAULT 0,
+  longest_streak INT NOT NULL DEFAULT 0,
+  last_activity_date DATE,
+  tasks_completed INT NOT NULL DEFAULT 0,
+  focus_sessions_completed INT NOT NULL DEFAULT 0,
+  total_study_hours NUMERIC(10,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-
--- ==========================================
--- GAMIFICATION: Achievement Definitions
--- ==========================================
--- Separate table for achievement metadata (what achievements exist)
-CREATE TABLE IF NOT EXISTS achievement_meta (
-    key TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    description TEXT,
-    icon TEXT,
-    target_value INTEGER,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
--- Seed achievement metadata
-INSERT INTO achievement_meta (key, title, description, icon, target_value) VALUES
-('first_steps', 'First Steps', 'Complete your first task', '🎯', 1),
-('week_warrior', 'Week Warrior', 'Maintain a 7-day streak', '🔥', 7),
-('fortnight_focus', 'Fortnight Focus', 'Maintain a 14-day streak', '⚡', 14),
-('marathon', 'Marathon', 'Maintain a 30-day streak', '🏃', 30),
-('focus_master', 'Focus Master', 'Complete 25 focus sessions', '⏱️', 25),
-('focus_legend', 'Focus Legend', 'Complete 100 focus sessions', '👑', 100),
-('night_owl', 'Night Owl', 'Study 50 hours total', '🦉', 50),
-('scholar', 'Scholar', 'Study 100 hours total', '📚', 100),
-('centurion', 'Centurion', 'Complete 100 tasks', '💯', 100),
-('taskmaster', 'Taskmaster', 'Complete 500 tasks', '🎖️', 500)
-ON CONFLICT (key) DO NOTHING;
-
--- Your existing 'achievements' table stores user unlocks (user_id, key, earned_at)
--- No changes needed to that table
 
 CREATE TABLE IF NOT EXISTS xp_activities (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    activity_type TEXT NOT NULL,
-    xp_gained INTEGER NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  activity_type TEXT NOT NULL,
+  xp_gained INT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Achievements system
+CREATE TABLE IF NOT EXISTS achievements (
+  id SERIAL PRIMARY KEY,
+  key TEXT UNIQUE NOT NULL,           -- e.g. 'FIRST_LOGIN', 'STREAK_7'
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  icon TEXT DEFAULT '🏆',
+  xp_reward INT DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS user_achievements (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  achievement_id INT NOT NULL REFERENCES achievements(id) ON DELETE CASCADE,
+  unlocked_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  metadata JSONB DEFAULT '{}',
+  UNIQUE(user_id, achievement_id)
 );
 
 -- ==========================================
--- FLASHCARDS TABLES
+-- FLASHCARDS / SPACED REPETITION
 -- ==========================================
 
 CREATE TABLE IF NOT EXISTS flashcard_decks (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    topic TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  topic TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS flashcards (
-    id SERIAL PRIMARY KEY,
-    deck_id INTEGER REFERENCES flashcard_decks(id) ON DELETE CASCADE,
-    front TEXT NOT NULL,
-    back TEXT NOT NULL,
-    interval NUMERIC(10,2) NOT NULL DEFAULT 1,
-    repetitions INTEGER NOT NULL DEFAULT 0,
-    ease_factor NUMERIC(3,2) NOT NULL DEFAULT 2.5,
-    next_review_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  id SERIAL PRIMARY KEY,
+  deck_id INT NOT NULL REFERENCES flashcard_decks(id) ON DELETE CASCADE,
+  front TEXT NOT NULL,
+  back TEXT NOT NULL,
+  interval NUMERIC NOT NULL DEFAULT 0,
+  repetitions INT NOT NULL DEFAULT 0,
+  ease_factor NUMERIC NOT NULL DEFAULT 2.5,
+  next_review_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS flashcard_reviews (
-    id SERIAL PRIMARY KEY,
-    card_id INTEGER REFERENCES flashcards(id) ON DELETE CASCADE,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    rating TEXT NOT NULL,
-    reviewed_at TIMESTAMP NOT NULL DEFAULT NOW()
+  id SERIAL PRIMARY KEY,
+  card_id INT NOT NULL REFERENCES flashcards(id) ON DELETE CASCADE,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rating TEXT NOT NULL,          -- AGAIN, HARD, GOOD, EASY
+  reviewed_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- ==========================================
@@ -260,31 +163,31 @@ CREATE TABLE IF NOT EXISTS flashcard_reviews (
 -- ==========================================
 
 CREATE TABLE IF NOT EXISTS topic_tags (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    color TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    UNIQUE(user_id, name)
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  color TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, name)
 );
 
 CREATE TABLE IF NOT EXISTS task_tags (
-    task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
-    tag_id INTEGER REFERENCES topic_tags(id) ON DELETE CASCADE,
-    PRIMARY KEY (task_id, tag_id)
+  task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
+  tag_id INTEGER REFERENCES topic_tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (task_id, tag_id)
 );
 
 CREATE TABLE IF NOT EXISTS revision_tags (
-    revision_id INTEGER REFERENCES revisions(id) ON DELETE CASCADE,
-    tag_id INTEGER REFERENCES topic_tags(id) ON DELETE CASCADE,
-    PRIMARY KEY (revision_id, tag_id)
+  revision_id INTEGER REFERENCES revisions(id) ON DELETE CASCADE,
+  tag_id INTEGER REFERENCES topic_tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (revision_id, tag_id)
 );
 
 CREATE TABLE IF NOT EXISTS deck_tags (
-    deck_id INTEGER REFERENCES flashcard_decks(id) ON DELETE CASCADE,
-    tag_id INTEGER REFERENCES topic_tags(id) ON DELETE CASCADE,
-    PRIMARY KEY (deck_id, tag_id)
+  deck_id INTEGER REFERENCES flashcard_decks(id) ON DELETE CASCADE,
+  tag_id INTEGER REFERENCES topic_tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (deck_id, tag_id)
 );
 
 -- ==========================================
@@ -292,23 +195,49 @@ CREATE TABLE IF NOT EXISTS deck_tags (
 -- ==========================================
 
 CREATE TABLE IF NOT EXISTS email_preferences (
-    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    weekly_digest BOOLEAN NOT NULL DEFAULT TRUE,
-    daily_reminders BOOLEAN NOT NULL DEFAULT FALSE,
-    achievement_alerts BOOLEAN NOT NULL DEFAULT TRUE,
-    overdue_tasks BOOLEAN NOT NULL DEFAULT TRUE,
-    preferred_time TIME NOT NULL DEFAULT '09:00:00',
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  weekly_digest BOOLEAN NOT NULL DEFAULT TRUE,
+  daily_reminders BOOLEAN NOT NULL DEFAULT FALSE,
+  achievement_alerts BOOLEAN NOT NULL DEFAULT TRUE,
+  overdue_tasks BOOLEAN NOT NULL DEFAULT TRUE,
+  preferred_time TIME NOT NULL DEFAULT '09:00:00',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- ==========================================
+-- ALERTS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS alerts (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL,          -- e.g. OVERDUE, WEAK, ACHIEVEMENT
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  meta JSONB DEFAULT '{}',
+  read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- ==========================================
 -- INDEXES
 -- ==========================================
 
-CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON user_achievements(user_id);
-CREATE INDEX IF NOT EXISTS idx_flashcards_next_review ON flashcards(next_review_at);
-CREATE INDEX IF NOT EXISTS idx_flashcards_deck ON flashcards(deck_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_user        ON tasks(user_id);
+CREATE INDEX IF NOT EXISTS idx_exams_user         ON exams(user_id);
+CREATE INDEX IF NOT EXISTS idx_revisions_user     ON revisions(user_id);
+CREATE INDEX IF NOT EXISTS idx_focus_sessions_user ON focus_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_xp_activities_user ON xp_activities(user_id);
-CREATE INDEX IF NOT EXISTS idx_task_tags_task ON task_tags(task_id);
-CREATE INDEX IF NOT EXISTS idx_task_tags_tag ON task_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON user_achievements(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_achievements_achievement ON user_achievements(achievement_id);
+CREATE INDEX IF NOT EXISTS idx_flashcards_next_review ON flashcards(next_review_at);
+CREATE INDEX IF NOT EXISTS idx_flashcards_deck    ON flashcards(deck_id);
+CREATE INDEX IF NOT EXISTS idx_task_tags_task     ON task_tags(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_tags_tag      ON task_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_revision_tags_revision ON revision_tags(revision_id);
+CREATE INDEX IF NOT EXISTS idx_revision_tags_tag  ON revision_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_deck_tags_deck     ON deck_tags(deck_id);
+CREATE INDEX IF NOT EXISTS idx_deck_tags_tag      ON deck_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_alerts_user        ON alerts(user_id);
+CREATE INDEX IF NOT EXISTS idx_alerts_read        ON alerts(read);
