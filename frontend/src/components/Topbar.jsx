@@ -2,7 +2,6 @@ import React from "react";
 import { clearToken } from "../api/client";
 import Badge from "./Badge";
 import AlertsBell from "./Alerts/AlertsBell";
-import ThemeToggle from "./ThemeToggle";
 
 export default function Topbar({ me, onLogout }) {
   const premium = me.plan === "PREMIUM" || me.role === "OWNER";
@@ -34,7 +33,6 @@ export default function Topbar({ me, onLogout }) {
         
         <div className="flex items-center gap-3">
           <AlertsBell />
-          <ThemeToggle />
           <button
             onClick={() => {
               clearToken();
