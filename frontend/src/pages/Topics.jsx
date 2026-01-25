@@ -19,8 +19,11 @@ export default function Topics({ me }) {
       try {
         const data = await topicsApi.getMastery();
         setMasteryData(data || []);
-      } catch {}
-      setLoading(false);
+      } catch (err) {
+        console.error("Failed to load topic mastery:", err);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -36,17 +39,31 @@ export default function Topics({ me }) {
       <PremiumGate me={me}>
         <PremiumCard title="Your Topic Mastery" subtitle="Color-coded by confidence level">
           {loading ? (
-            <div className="text-center py-12 text-slate-400">Loading mastery data...</div>
-          ) : masteryData.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
-              No topic data yet — start revising to see your heatmap!
+              Loading your mastery data...
+            </div>
+          ) : masteryData.length === 0 ? (
+            <div className="text-center py-12 px-4">
+              <div className="text-4xl mb-4">📚</div>
+              <h3 className="text-xl font-medium text-white mb-2">
+                No topics yet!
+              </h3>
+              <p className="text-slate-400 mb-6 max-w-md mx-auto">
+                Start creating tags and revising topics to build your mastery heatmap.<br />
+                The more you study, the clearer your strengths and weaknesses will appear!
+              </p>
+              <p className="text-sm text-slate-500">
+                Tip: Go to the <span className="text-indigo-400">Tags</span> section to create your first topics
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {masteryData.map((topic) => (
-                <div 
+                <div
                   key={topic.id || topic.name}
-                  className={`p-4 rounded-xl border text-center smooth-transition hover:scale-105 ${getHeatColor(topic.mastery)}`}
+                  className={`p-4 rounded-xl border text-center smooth-transition hover:scale-105 ${getHeatColor(
+                    topic.mastery
+                  )}`}
                 >
                   <div className="text-lg font-medium text-white">{topic.name}</div>
                   <div className="text-2xl mt-2">
