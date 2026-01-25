@@ -182,10 +182,12 @@ CREATE TABLE IF NOT EXISTS user_gamification (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Note: Using simpler achievements table to match your existing pattern
-CREATE TABLE IF NOT EXISTS achievement_definitions (
-    id SERIAL PRIMARY KEY,
-    key TEXT UNIQUE NOT NULL,
+-- ==========================================
+-- GAMIFICATION: Achievement Definitions
+-- ==========================================
+-- Separate table for achievement metadata (what achievements exist)
+CREATE TABLE IF NOT EXISTS achievement_meta (
+    key TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
     icon TEXT,
@@ -193,22 +195,8 @@ CREATE TABLE IF NOT EXISTS achievement_definitions (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Note: Reusing your existing 'achievements' table pattern
--- Just ensure it has user_id and key columns
-ALTER TABLE IF EXISTS achievements 
-  ADD COLUMN IF NOT EXISTS key TEXT;
-
-CREATE TABLE IF NOT EXISTS xp_activities (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    activity_type TEXT NOT NULL,
-    xp_gained INTEGER NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
--- Seed achievement definitions
-INSERT INTO achievement_definitions (key, title, description, icon, target_value) VALUES
+-- Seed achievement metadata
+INSERT INTO achievement_meta (key, title, description, icon, target_value) VALUES
 ('first_steps', 'First Steps', 'Complete your first task', '🎯', 1),
 ('week_warrior', 'Week Warrior', 'Maintain a 7-day streak', '🔥', 7),
 ('fortnight_focus', 'Fortnight Focus', 'Maintain a 14-day streak', '⚡', 14),
@@ -220,6 +208,18 @@ INSERT INTO achievement_definitions (key, title, description, icon, target_value
 ('centurion', 'Centurion', 'Complete 100 tasks', '💯', 100),
 ('taskmaster', 'Taskmaster', 'Complete 500 tasks', '🎖️', 500)
 ON CONFLICT (key) DO NOTHING;
+
+-- Your existing 'achievements' table stores user unlocks (user_id, key, earned_at)
+-- No changes needed to that table
+
+CREATE TABLE IF NOT EXISTS xp_activities (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    activity_type TEXT NOT NULL,
+    xp_gained INTEGER NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
 
 -- ==========================================
 -- FLASHCARDS TABLES
@@ -306,7 +306,7 @@ CREATE TABLE IF NOT EXISTS email_preferences (
 -- INDEXES
 -- ==========================================
 
-CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON achievements(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON user_achievements(user_id);
 CREATE INDEX IF NOT EXISTS idx_flashcards_next_review ON flashcards(next_review_at);
 CREATE INDEX IF NOT EXISTS idx_flashcards_deck ON flashcards(deck_id);
 CREATE INDEX IF NOT EXISTS idx_xp_activities_user ON xp_activities(user_id);
