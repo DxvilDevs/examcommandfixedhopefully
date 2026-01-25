@@ -1,6 +1,6 @@
-import express from 'express';
-import auth from '../middleware/auth.js';
-import db from '../config/db.js';
+const express = require('express');
+const auth = require('../middleware/auth');
+const db = require('../config/db');
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.get('/mastery', auth, async (req, res) => {
       LEFT JOIN revisions r ON r.id = rt.revision_id AND r.user_id = $1
       LEFT JOIN flashcards f ON f.deck_id IN (
         SELECT id FROM flashcard_decks WHERE user_id = $1
-      )  -- rough approximation
+      )
       GROUP BY t.id, t.name
       ORDER BY mastery_raw ASC
     `, [userId]);
@@ -29,7 +29,7 @@ router.get('/mastery', auth, async (req, res) => {
     const masteryData = rows.map(r => ({
       id: r.id,
       name: r.name,
-      mastery: (r.mastery_raw / 5),          // normalize 1–5 → 0–1
+      mastery: r.mastery_raw / 5,
       cardsDue: r.cards_due || 0,
       revisions: r.revisions || 0
     }));
@@ -40,4 +40,4 @@ router.get('/mastery', auth, async (req, res) => {
   }
 });
 
-export const topicsRoutes = router;
+module.exports = router;
