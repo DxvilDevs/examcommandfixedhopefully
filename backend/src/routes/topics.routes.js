@@ -1,7 +1,6 @@
-// src/routes/topics.routes.js
-const express = require('express');
-const auth = require('../middleware/auth');
-const db = require('../config/db');
+import express from 'express';
+import auth from '../middleware/auth.js';
+import db from '../config/db.js';
 
 const router = express.Router();
 
@@ -10,26 +9,29 @@ router.get('/mastery', auth, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Simple mastery calc: average confidence from revisions + due cards
     const { rows } = await db.query(`
       SELECT 
         t.id,
         t.name,
-        AVG(r.confidence) as mastery,  -- 1-5 scale, normalize to 0-1
+        COALESCE(AVG(r.confidence), 1) as mastery_raw,
         COUNT(f.id) FILTER (WHERE f.next_review_at < NOW()) as cards_due,
         COUNT(r.id) as revisions
       FROM topic_tags t
-      LEFT JOIN revisions r ON r.user_id = $1
-      LEFT JOIN revision_tags rt ON rt.revision_id = r.id AND rt.tag_id = t.id
-      LEFT JOIN flashcards f ON f.user_id = $1  -- assume flashcards have topic
+      LEFT JOIN revision_tags rt ON rt.tag_id = t.id
+      LEFT JOIN revisions r ON r.id = rt.revision_id AND r.user_id = $1
+      LEFT JOIN flashcards f ON f.deck_id IN (
+        SELECT id FROM flashcard_decks WHERE user_id = $1
+      )  -- rough approximation
       GROUP BY t.id, t.name
-      ORDER BY mastery ASC
+      ORDER BY mastery_raw ASC
     `, [userId]);
 
-    // Normalize mastery to 0-1
     const masteryData = rows.map(r => ({
-      ...r,
-      mastery: (r.mastery || 1) / 5
+      id: r.id,
+      name: r.name,
+      mastery: (r.mastery_raw / 5),          // normalize 1–5 → 0–1
+      cardsDue: r.cards_due || 0,
+      revisions: r.revisions || 0
     }));
 
     res.json(masteryData);
@@ -38,10 +40,4 @@ router.get('/mastery', auth, async (req, res) => {
   }
 });
 
-// GET /topics/:id
-router.get('/:id', auth, async (req, res) => {
-  // Details for one topic
-  res.json({ /* fetch details */ });
-});
-
-module.exports = router;
+export const topicsRoutes = router;
