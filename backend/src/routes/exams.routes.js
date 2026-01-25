@@ -8,11 +8,12 @@ export const examsRoutes = express.Router();
 examsRoutes.post("/mock/generate", authRequired, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { durationMinutes = 60 } = req.body; // topicFilter removed
+    const { durationMinutes = 60 } = req.body;
 
+    // Fetch random flashcards belonging to the user (via deck ownership)
     const { rows: questions } = await pool.query(
       `SELECT f.id, f.front as text, f.back as correct_answer,
-              '["A","B","C","D"]'::jsonb as options
+              '["A","B","C","D"]'::jsonb as options_raw
        FROM flashcards f
        JOIN flashcard_decks d ON d.id = f.deck_id
        WHERE d.user_id = $1
@@ -24,28 +25,39 @@ examsRoutes.post("/mock/generate", authRequired, async (req, res) => {
       return res.status(400).json({ error: "No flashcards available to generate mock" });
     }
 
+    // Create the mock exam record
     const { rows: [mock] } = await pool.query(
       `INSERT INTO mock_exams (user_id, duration_minutes)
        VALUES ($1, $2) RETURNING id, started_at`,
       [userId, durationMinutes]
     );
 
+    // Insert each question — IMPORTANT: stringify options for JSONB column
     for (const q of questions) {
+      const optionsJson = JSON.stringify(q.options_raw); // convert array back to JSON string
+
       await pool.query(
         `INSERT INTO mock_questions (mock_id, text, options, correct_answer)
          VALUES ($1, $2, $3, $4)`,
-        [mock.id, q.text, q.options, q.correct_answer]
+        [mock.id, q.text, optionsJson, q.correct_answer]
       );
     }
 
+    // Optional: fetch inserted questions to return full data
+    const { rows: fullQuestions } = await pool.query(
+      `SELECT id, text, options, correct_answer
+       FROM mock_questions WHERE mock_id = $1`,
+      [mock.id]
+    );
+
     res.json({
       id: mock.id,
-      questions,
+      questions: fullQuestions,
       durationMinutes,
-      startedAt: mock.started_at
+      startedAt: mock.started_at.toISOString()
     });
   } catch (err) {
-    console.error("Mock generate error:", err);
+    console.error("Mock exam generation failed:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -54,15 +66,18 @@ examsRoutes.post("/mock/generate", authRequired, async (req, res) => {
 examsRoutes.post("/mock/:mockId/answer", authRequired, async (req, res) => {
   try {
     const { questionId, answer } = req.body;
+    const mockId = req.params.mockId;
+
     await pool.query(
       `UPDATE mock_questions
        SET user_answer = $1
        WHERE id = $2 AND mock_id = $3`,
-      [answer, questionId, req.params.mockId]
+      [answer, questionId, mockId]
     );
+
     res.json({ success: true });
   } catch (err) {
-    console.error("Mock answer error:", err);
+    console.error("Mock answer save failed:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -91,7 +106,7 @@ examsRoutes.post("/mock/:mockId/finish", authRequired, async (req, res) => {
 
     res.json({ score, correct, total });
   } catch (err) {
-    console.error("Mock finish error:", err);
+    console.error("Mock exam finish failed:", err);
     res.status(500).json({ error: err.message });
   }
 });
