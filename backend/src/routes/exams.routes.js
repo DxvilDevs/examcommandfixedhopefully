@@ -1,6 +1,6 @@
-import express from 'express';
-import auth from '../middleware/auth.js';
-import db from '../config/db.js';
+const express = require('express');
+const auth = require('../middleware/auth');
+const db = require('../config/db');
 
 const router = express.Router();
 
@@ -28,7 +28,7 @@ router.post('/mock/generate', auth, async (req, res) => {
     const { rows: questions } = await db.query(query, params);
 
     if (questions.length === 0) {
-      return res.status(400).json({ error: "No flashcards available to generate mock" });
+      return res.status(400).json({ error: "No flashcards available" });
     }
 
     const { rows: [mock] } = await db.query(`
@@ -58,14 +58,11 @@ router.post('/mock/generate', auth, async (req, res) => {
 router.post('/mock/:mockId/answer', auth, async (req, res) => {
   try {
     const { questionId, answer } = req.body;
-    const mockId = req.params.mockId;
-
     await db.query(`
       UPDATE mock_questions 
       SET user_answer = $1
       WHERE id = $2 AND mock_id = $3
-    `, [answer, questionId, mockId]);
-
+    `, [answer, questionId, req.params.mockId]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -78,7 +75,7 @@ router.post('/mock/:mockId/finish', auth, async (req, res) => {
     const mockId = req.params.mockId;
 
     const { rows: questions } = await db.query(`
-      SELECT correct_answer = user_answer as correct
+      SELECT (correct_answer = user_answer) as correct
       FROM mock_questions WHERE mock_id = $1
     `, [mockId]);
 
@@ -98,4 +95,4 @@ router.post('/mock/:mockId/finish', auth, async (req, res) => {
   }
 });
 
-export const examsRoutes = router;
+module.exports = router;
