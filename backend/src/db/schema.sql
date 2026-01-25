@@ -220,6 +220,62 @@ CREATE TABLE IF NOT EXISTS alerts (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- Add to end of schema.sql before indexes
+
+-- ==========================================
+-- RESOURCES FOR FEATURE 9
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS resources (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    url TEXT NOT NULL,
+    description TEXT,
+    type TEXT DEFAULT 'LINK',  -- LINK | PDF | VIDEO | NOTE
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS resource_tags (
+    resource_id INT REFERENCES resources(id) ON DELETE CASCADE,
+    tag_id INT REFERENCES topic_tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (resource_id, tag_id)
+);
+
+-- ==========================================
+-- MOCK EXAMS FOR FEATURE 7
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS mock_exams (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    duration_minutes INT NOT NULL,
+    topic_filter TEXT,
+    started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    finished_at TIMESTAMP,
+    score NUMERIC(5,2),
+    correct INT DEFAULT 0,
+    incorrect INT DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS mock_questions (
+    id SERIAL PRIMARY KEY,
+    mock_id INT NOT NULL REFERENCES mock_exams(id) ON DELETE CASCADE,
+    text TEXT NOT NULL,
+    options JSONB NOT NULL,  -- array of options
+    correct_answer TEXT NOT NULL,
+    user_answer TEXT,
+    topic TEXT
+);
+
+-- Add new indexes to the INDEXES section
+CREATE INDEX IF NOT EXISTS idx_resources_user ON resources(user_id);
+CREATE INDEX IF NOT EXISTS idx_resource_tags_resource ON resource_tags(resource_id);
+CREATE INDEX IF NOT EXISTS idx_resource_tags_tag ON resource_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_mock_exams_user ON mock_exams(user_id);
+CREATE INDEX IF NOT EXISTS idx_mock_questions_mock ON mock_questions(mock_id);
+
 -- ==========================================
 -- INDEXES
 -- ==========================================
