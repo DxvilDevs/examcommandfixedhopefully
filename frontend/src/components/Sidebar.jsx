@@ -34,9 +34,21 @@ export default function Sidebar() {
           <span className="text-lg">🎴</span>
           <span>Flashcards</span>
         </NavLink>
-        <NavLink to="/settings" className={linkCls}>
-          <span className="text-lg">⚙️</span>
-          <span>Settings</span>
+        <NavLink to="/ai-planner" className={linkCls}>
+          <span className="text-lg">🤖</span>
+          <span>AI Planner</span>
+        </NavLink>
+        <NavLink to="/topics" className={linkCls}>
+          <span className="text-lg">🗺️</span>
+          <span>Topic Mastery</span>
+        </NavLink>
+        <NavLink to="/mock-exam" className={linkCls}>
+          <span className="text-lg">📝</span>
+          <span>Mock Exams</span>
+        </NavLink>
+        <NavLink to="/resources" className={linkCls}>
+          <span className="text-lg">📚</span>
+          <span>Resources</span>
         </NavLink>
         <NavLink to="/subscribe" className={linkCls}>
           <span className="text-lg">⭐</span>
@@ -46,9 +58,9 @@ export default function Sidebar() {
           <span className="text-lg">📡</span>
           <span>Status</span>
         </NavLink>
-        <NavLink to="/account" className={linkCls}>
-          <span className="text-lg">👤</span>
-          <span>Account</span>
+        <NavLink to="/settings" className={linkCls}>
+          <span className="text-lg">⚙️</span>
+          <span>Settings</span>
         </NavLink>
         
         <div className="pt-4 mt-4 border-t border-white/10">
