@@ -11,10 +11,11 @@ examsRoutes.post("/mock/generate", authRequired, async (req, res) => {
     const { durationMinutes = 60 } = req.body; // topicFilter removed
 
     const { rows: questions } = await pool.query(
-      `SELECT id, front as text, back as correct_answer,
+      `SELECT f.id, f.front as text, f.back as correct_answer,
               '["A","B","C","D"]'::jsonb as options
-       FROM flashcards
-       WHERE user_id = $1
+       FROM flashcards f
+       JOIN flashcard_decks d ON d.id = f.deck_id
+       WHERE d.user_id = $1
        ORDER BY RANDOM() LIMIT 10`,
       [userId]
     );
@@ -44,6 +45,7 @@ examsRoutes.post("/mock/generate", authRequired, async (req, res) => {
       startedAt: mock.started_at
     });
   } catch (err) {
+    console.error("Mock generate error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -60,6 +62,7 @@ examsRoutes.post("/mock/:mockId/answer", authRequired, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
+    console.error("Mock answer error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -88,6 +91,7 @@ examsRoutes.post("/mock/:mockId/finish", authRequired, async (req, res) => {
 
     res.json({ score, correct, total });
   } catch (err) {
+    console.error("Mock finish error:", err);
     res.status(500).json({ error: err.message });
   }
 });
