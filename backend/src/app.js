@@ -16,6 +16,11 @@ import { flashcardsRoutes } from "./routes/flashcards.routes.js";
 import { tagsRoutes } from "./routes/tags.routes.js";
 import { emailRoutes } from "./routes/email.routes.js";
 import { errorHandler } from "./middleware/error.js";
+import { plannerEnhancedRoutes } from "./routes/plannerEnhanced.routes.js"
+import { topicsRoutes } from "./routes/topics.routes.js"
+import { examsRoutes } from "./routes/exams.routes.js"
+import { resourcesRoutes } from "./routes/resources.routes.js"
+
 
 export function createApp() {
   const app = express();
@@ -48,6 +53,10 @@ export function createApp() {
   app.use("/plan", planRoutes);
   app.use("/focus", focusRoutes);
   app.use("/alerts", alertsRoutes);
+  app.use('/planner', plannerEnhancedRoutes);
+  app.use('/topics', topicsRoutes);
+  app.use('/exams', examsRoutes);
+  app.use('/resources', resourcesRoutes);
 
   // ✅ NEW FEATURE ROUTES
   app.use("/gamification", gamificationRoutes);
