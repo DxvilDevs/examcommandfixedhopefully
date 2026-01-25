@@ -1,6 +1,6 @@
-import express from 'express';
-import auth from '../middleware/auth.js';
-import db from '../config/db.js';
+const express = require('express');
+const auth = require('../middleware/auth');
+const db = require('../config/db');
 
 const router = express.Router();
 
@@ -82,12 +82,11 @@ router.put('/:id', auth, async (req, res) => {
 // DELETE /resources/:id
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const id = req.params.id;
-    await db.query(`DELETE FROM resources WHERE id = $1 AND user_id = $2`, [id, req.user.id]);
+    await db.query(`DELETE FROM resources WHERE id = $1 AND user_id = $2`, [req.params.id, req.user.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-export const resourcesRoutes = router;
+module.exports = router;
