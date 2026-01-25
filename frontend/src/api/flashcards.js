@@ -1,6 +1,8 @@
 // ============================================
 // flashcards.js
 // ============================================
+import { api } from "./client";   // ← ADD THIS LINE
+
 export const flashcardsApi = {
   async getDecks() {
     return api("/flashcards/decks");
@@ -9,7 +11,7 @@ export const flashcardsApi = {
   async createDeck(name, topic) {
     return api("/flashcards/decks", {
       method: "POST",
-      body: { name, topic }
+      body: { name, topic }          // no JSON.stringify here — client.js handles it
     });
   },
 
