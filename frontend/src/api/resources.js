@@ -6,12 +6,12 @@ export const resourcesApi = {
   
   create: (data) => api("/resources", { 
     method: "POST", 
-    body: JSON.stringify(data) // { title, url, description, tags: [] }
+    body: data // { title, url, description, tags: [] }
   }),
   
   update: (id, data) => api(`/resources/${id}`, { 
     method: "PUT", 
-    body: JSON.stringify(data) 
+    body: data 
   }),
   
   delete: (id) => api(`/resources/${id}`, { method: "DELETE" }),
