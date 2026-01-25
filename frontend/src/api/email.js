@@ -9,7 +9,7 @@ export const emailApi = {
   async updateSettings(settings) {
     return api("/email/settings", {
       method: "PUT",
-      body: JSON.stringify(settings)
+      body: settings
     });
   }
 };
