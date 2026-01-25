@@ -306,7 +306,7 @@ CREATE TABLE IF NOT EXISTS email_preferences (
 -- INDEXES
 -- ==========================================
 
-CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON user_achievements(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON achievements(user_id);
 CREATE INDEX IF NOT EXISTS idx_flashcards_next_review ON flashcards(next_review_at);
 CREATE INDEX IF NOT EXISTS idx_flashcards_deck ON flashcards(deck_id);
 CREATE INDEX IF NOT EXISTS idx_xp_activities_user ON xp_activities(user_id);
