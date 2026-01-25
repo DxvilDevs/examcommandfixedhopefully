@@ -17,6 +17,10 @@ import NotFound from "./pages/NotFound";
 import Preview from "./pages/Preview";
 import Flashcards from "./pages/Flashcards";
 import Settings from "./pages/Settings";
+import AIPlanner from "./pages/AIPlanner";
+import Topics from "./pages/Topics";
+import MockExam from "./pages/MockExam";
+import Resources from "./pages/Resources";
 
 
 export default function App() {
@@ -81,6 +85,10 @@ export default function App() {
             <Route index element={<Home me={me} />} />
             <Route path="focus" element={<Focus me={me} />} />
             <Route path="preview" element={<Preview me={me} />} />
+            <Route path="ai-planner" element={<AIPlanner me={me} />} />
+            <Route path="topics" element={<Topics me={me} />} />
+            <Route path="mock-exam" element={<MockExam me={me} />} />
+            <Route path="resources" element={<Resources />} />
             <Route path="flashcards" element={<Flashcards />} />
             <Route path="settings" element={<Settings me={me} onUpdated={setMe} />} />
             <Route path="account" element={<Account me={me} onUpdated={setMe} />} />
