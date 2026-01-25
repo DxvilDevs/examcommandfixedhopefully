@@ -58,7 +58,7 @@ export default function FlashcardsCard() {
   async function loadDueCards(deckId) {
     try {
       setError(null);
-      const cards = await flashcardsApi.getDue(deckId);
+      const cards = await flashcardsApi.getDueCards(deckId);
       setDueCards(cards || []);
       setCurrentCardIndex(0);
       setShowBack(false);
