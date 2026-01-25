@@ -9,14 +9,14 @@ export const tagsApi = {
   async createTag(name, color) {
     return api("/tags", {
       method: "POST",
-      body: JSON.stringify({ name, color })
+      body: { name, color }
     });
   },
 
   async updateTag(id, data) {
     return api(`/tags/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data)
+      body: data
     });
   },
 
@@ -29,14 +29,14 @@ export const tagsApi = {
   async attachTag(tagId, entityType, entityId) {
     return api(`/tags/${tagId}/attach`, {
       method: "POST",
-      body: JSON.stringify({ entityType, entityId })
+      body: { entityType, entityId }
     });
   },
 
   async detachTag(tagId, entityType, entityId) {
     return api(`/tags/${tagId}/detach`, {
       method: "DELETE",
-      body: JSON.stringify({ entityType, entityId })
+      body: { entityType, entityId }
     });
   }
 };
